@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} — متاکافی{% endblock %}
+{% block content %}
+  <h1>{{ post.title }}</h1>
+  <div>{{ post.body|linebreaks }}</div>
+{% endblock %}
