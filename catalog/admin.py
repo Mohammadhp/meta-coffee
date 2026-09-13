@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from django.contrib import admin
 
-from catalog.models import Seller, BeanListing, GearListing
+from catalog.models import Seller, BeanListing, GearListing, SearchQuery
 
 
 def mark_bean_verified(modeladmin, request, queryset):
@@ -36,3 +36,13 @@ class GearListingAdmin(admin.ModelAdmin):
     list_filter = ("category", "in_stock")
     search_fields = ("name", "brand")
     list_select_related = ("seller",)
+
+
+@admin.register(SearchQuery)
+class SearchQueryAdmin(admin.ModelAdmin):
+    list_display = ("query_text", "created_at")
+    search_fields = ("query_text",)
+    date_hierarchy = "created_at"
+
+    def has_add_permission(self, request):
+        return False
