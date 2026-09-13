@@ -1,0 +1,144 @@
+[
+  {
+    "name": "Rio",
+    "domain": "rio.coffee",
+    "status": 200,
+    "final_url": "https://www.rio.coffee/",
+    "title": "",
+    "len": 14595
+  },
+  {
+    "name": "Cafe Raees",
+    "domain": "raeescoffee.com",
+    "status": 200,
+    "final_url": "https://raeescoffee.com",
+    "title": "فروشگاه اینترنتی قهوه رئیس",
+    "len": 163523
+  },
+  {
+    "name": "Emkan Roastery",
+    "domain": "emkan-coffee.com",
+    "status": 200,
+    "final_url": "https://emkan-coffee.com",
+    "title": "کارگاه برشته کاری قهوه امکان &#8211; امکانِ خرید قهوه‌ی تازه برشت و با کیفیت فرصتی است که ما برای شما به ارمغان آورده‌ای",
+    "len": 384103
+  },
+  {
+    "name": "Vaka Coffee",
+    "domain": "vakacoffee.com",
+    "status": 200,
+    "final_url": "https://vakacoffee.com",
+    "title": "خرید قهوه | فروشگاه آنلاین قهوه واکا 🧙 ☕️ + امکان اقساط بدون سود",
+    "len": 309918
+  },
+  {
+    "name": "Farda Roastery",
+    "domain": "fardaroastery.ir",
+    "status": 200,
+    "final_url": "https://fardaroastery.ir",
+    "title": "خرید اینترنتی قهوه تازه | روستری قهوه فردا",
+    "len": 147955
+  },
+  {
+    "name": "Erido Coffee",
+    "domain": "eridocoffee.com",
+    "status": 200,
+    "final_url": "https://eridocoffee.com",
+    "title": "اریدو | کافه رستری و فروشگاه قهوه",
+    "len": 540221
+  },
+  {
+    "name": "Luya Coffee",
+    "domain": "luyacoffee.com",
+    "status": 200,
+    "final_url": "https://luyacoffee.com",
+    "title": "خرید قهوه، فروشگاه آنلاین قهوه خرید قهوه لویا",
+    "len": 321637
+  },
+  {
+    "name": "Houfer Coffee",
+    "domain": "houfercoffee.com",
+    "status": 200,
+    "final_url": "https://houfercoffee.com",
+    "title": "هوفر کافی؛ فروشگاه آنلاین قهوه عربیکا، ترک و روبوستا",
+    "len": 434282
+  },
+  {
+    "name": "Bunas",
+    "domain": "bunas.ir",
+    "status": 200,
+    "final_url": "https://bunas.ir",
+    "title": "خرید قهوه آنلاین با رست تازه و ارسال فوری - قهوه بوناس",
+    "len": 240916
+  },
+  {
+    "name": "Xav Coffee Factory",
+    "domain": "xav.coffee",
+    "status": 200,
+    "final_url": "https://xav.coffee",
+    "title": "خانه - کارخانه قهوه ژاو",
+    "len": 127212
+  },
+  {
+    "name": "Rei Coffee Roasters",
+    "domain": "rei.coffee",
+    "status": 200,
+    "final_url": "https://rei.coffee",
+    "title": "خرید قهوه آنلاین - برشته‌کاری قهوه ری",
+    "len": 818086
+  },
+  {
+    "name": "Lemm Coffee",
+    "domain": "lemm.coffee",
+    "status": 200,
+    "final_url": "https://lemm.coffee",
+    "title": "فروشگاه آنلاین برشته کاری قهوه لم Lemm Coffee",
+    "len": 152902
+  },
+  {
+    "name": "MeCafe Roasters",
+    "domain": "mecafe.me",
+    "status": 200,
+    "final_url": "https://mecafe.me",
+    "title": "کارخانه قهوه می کافه | رستری تخصصی قهوه می کافه",
+    "len": 344498
+  },
+  {
+    "name": "Garneek Coffee Workshop",
+    "domain": "garneekcoffee.com",
+    "status": 200,
+    "final_url": "https://garneekcoffee.com",
+    "title": "خرید قهوه از فروشگاه قهوه گارنیک[+15گونه] انواع تجهیزات قهوه",
+    "len": 1069063
+  },
+  {
+    "name": "Lamiz Coffee",
+    "domain": "lamizcoffee.com",
+    "status": 200,
+    "final_url": "https://lamizcoffee.com",
+    "title": "قهوه لمیز",
+    "len": 242169
+  },
+  {
+    "name": "Sam Coffee Roasters",
+    "domain": "samcoffeeroasters.com",
+    "status": 200,
+    "final_url": "https://www.samcoffeeroasters.com/",
+    "title": "خانه | سام‌کافی‌رسترز",
+    "len": 26612
+  },
+  {
+    "name": "Kazhvan Coffee",
+    "domain": "kazhvancoffee.com",
+    "status": 200,
+    "final_url": "https://kazhvancoffee.com",
+    "title": "خرید قهوه عمده زیر قیمت بازار (شهریور 1405)",
+    "len": 518308
+  },
+  {
+    "name": "Redpill Roastery",
+    "domain": "redpillroastery.com",
+    "status": "ERR",
+    "error": "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'redpillroastery.com'. (_ssl.c:1077)"
+  }
+]

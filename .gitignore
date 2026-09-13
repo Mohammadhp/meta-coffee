@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+*.xlsx~
+scraper/catalog.xlsx
+scraper/~$*.xlsx
+.DS_Store
+.idea/
