@@ -65,8 +65,8 @@ class BeanListing(models.Model):
     in_stock = models.BooleanField(blank=True, null=True)
     is_verified = models.BooleanField(default=False)
     last_verified = models.DateTimeField(blank=True, null=True)
-    link = models.URLField(blank=True, default="")
-    source_key = models.URLField(unique=True)
+    link = models.URLField(blank=True, default="", max_length=500)
+    source_key = models.URLField(unique=True, max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -96,8 +96,8 @@ class GearListing(models.Model):
     price_toman = models.BigIntegerField(blank=True, null=True)
     in_stock = models.BooleanField(blank=True, null=True)
     last_crawled = models.DateTimeField(blank=True, null=True)
-    link = models.URLField(blank=True, default="")
-    source_key = models.URLField(unique=True)
+    link = models.URLField(blank=True, default="", max_length=500)
+    source_key = models.URLField(unique=True, max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
