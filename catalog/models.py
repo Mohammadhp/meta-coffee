@@ -71,3 +71,29 @@ class BeanListing(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class GearListing(models.Model):
+    class GearCategory(models.TextChoices):
+        GRINDER = "grinder", "Grinder"
+        BREWER = "brewer", "Brewer"
+        KETTLE = "kettle", "Kettle"
+        FILTER = "filter", "Filter"
+        ACCESSORY = "accessory", "Accessory"
+
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name="gear")
+    name = models.CharField(max_length=200)
+    category = models.CharField(max_length=20, choices=GearCategory.choices, blank=True, null=True)
+    brand = models.CharField(max_length=100, blank=True, null=True)
+    model = models.CharField(max_length=100, blank=True, null=True)
+    key_specs = models.TextField(blank=True, null=True)
+    price_toman = models.BigIntegerField(blank=True, null=True)
+    in_stock = models.BooleanField(blank=True, null=True)
+    last_crawled = models.DateTimeField(blank=True, null=True)
+    link = models.URLField(blank=True, default="")
+    source_key = models.URLField(unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
