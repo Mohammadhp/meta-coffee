@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}متاکافی — جستجوی قهوه ایران{% endblock %}
+{% block content %}
+  <h1>قهوه‌ات را پیدا کن</h1>
+  <p>جستجو بر اساس خاستگاه، برشته، فرآوری و تجهیزات دم‌آوری میان فروشندگان معتبر ایران.</p>
+  <form action="{% url 'search' %}" method="get">
+    <input type="text" name="q" placeholder="مثلاً برزیل شکلاتی یا آسیاب دستی">
+    <button type="submit">جستجو</button>
+  </form>
+  <p><a href="{% url 'search' %}">مرور همه</a></p>
+{% endblock %}

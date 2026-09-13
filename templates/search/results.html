@@ -1,1 +1,50 @@
-{% for b in beans %}{{ b.name }}{% endfor %}{% for g in gear %}{{ g.name }}{% endfor %}
+{% extends "base.html" %}
+{% load listing_tags %}
+{% block title %}نتایج جستجو — متاکافی{% endblock %}
+{% block content %}
+  <form action="{% url 'search' %}" method="get">
+    <input type="text" name="q" value="{{ active.q }}">
+    <button type="submit">جستجو</button>
+  </form>
+  <p>{{ total }} نتیجه</p>
+
+  <aside>
+    <h3>خاستگاه</h3>
+    <ul>{% for f in facets.origins %}<li><a href="?origin={{ f.value }}">{{ f.label }} ({{ f.count }})</a></li>{% endfor %}</ul>
+    <h3>برشت</h3>
+    <ul>{% for f in facets.roasts %}<li><a href="?roast={{ f.value }}">{{ f.label }} ({{ f.count }})</a></li>{% endfor %}</ul>
+    <h3>فرآوری</h3>
+    <ul>{% for f in facets.processes %}<li><a href="?process={{ f.value }}">{{ f.label }} ({{ f.count }})</a></li>{% endfor %}</ul>
+    <h3>دسته (تجهیزات)</h3>
+    <ul>{% for f in facets.gear_categories %}<li><a href="?category={{ f.value }}">{{ f.label }} ({{ f.count }})</a></li>{% endfor %}</ul>
+  </aside>
+
+  <h2>دانه‌ها (اصالت‌دار)</h2>
+  <ul>
+    {% for b in beans %}
+      <li>
+        <a href="{{ b.link|outbound }}" rel="nofollow noopener" target="_blank">{{ b.name }}</a>
+        — {{ b.origin|default:"—" }} · {{ b.roast_level|default:"" }} · {{ b.process|default:"" }}
+        {% if b.price_toman %}({{ b.price_toman }} تومان){% endif %}
+        {% if b.last_verified %}· تأیید شده {{ b.last_verified|days_ago }}{% endif %}
+        <a href="?origin={{ b.origin }}">…</a>
+      </li>
+    {% empty %}
+      <li>دانه‌ای یافت نشد.</li>
+    {% endfor %}
+  </ul>
+
+  <h2>تجهیزات</h2>
+  <ul>
+    {% for g in gear %}
+      <li>
+        <a href="{{ g.link|outbound }}" rel="nofollow noopener" target="_blank">{{ g.name }}</a>
+        — {{ g.category|default:"—" }}
+        {% if g.price_toman %}({{ g.price_toman }} تومان){% endif %}
+        {% if g.last_crawled %}· به‌روزرسانی {{ g.last_crawled|days_ago }}{% endif %}
+      </li>
+    {% empty %}
+      <li>تجهیزاتی یافت نشد.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
