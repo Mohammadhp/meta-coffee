@@ -1,3 +1,4 @@
+from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 
 
@@ -69,6 +70,11 @@ class BeanListing(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        indexes = [
+            GinIndex(fields=["name"], name="bean_name_trgm", opclasses=["gin_trgm_ops"]),
+        ]
+
     def __str__(self):
         return self.name
 
@@ -94,6 +100,11 @@ class GearListing(models.Model):
     source_key = models.URLField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            GinIndex(fields=["name"], name="gear_name_trgm", opclasses=["gin_trgm_ops"]),
+        ]
 
     def __str__(self):
         return self.name
