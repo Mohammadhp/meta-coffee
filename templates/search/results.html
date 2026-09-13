@@ -4,6 +4,12 @@
 {% block content %}
   <form action="{% url 'search' %}" method="get">
     <input type="text" name="q" value="{{ active.q }}">
+    <select name="sort">
+      <option value="" {% if active.sort == "" %}selected{% endif %}>بهترین</option>
+      <option value="price_asc" {% if active.sort == "price_asc" %}selected{% endif %}>ارزان‌ترین</option>
+      <option value="price_desc" {% if active.sort == "price_desc" %}selected{% endif %}>گران‌ترین</option>
+      <option value="newest" {% if active.sort == "newest" %}selected{% endif %}>جدیدترین</option>
+    </select>
     <button type="submit">جستجو</button>
   </form>
   <p>{{ total }} نتیجه</p>

@@ -36,3 +36,12 @@ class SearchViewTest(TestCase):
     def test_zero_result_is_logged(self):
         self.client.get(reverse("search"), {"q": "چیز ناموجود"})
         self.assertEqual(SearchQuery.objects.filter(query_text="چیز ناموجود").count(), 1)
+
+    def test_price_sort(self):
+        BeanListing.objects.create(
+            seller=Seller.objects.get(name="Cafe Raees"), name="ارزان",
+            is_verified=True, price_toman=100_000, source_key="https://r.example/cheap",
+            link="https://r.example/cheap")
+        resp = self.client.get(reverse("search"), {"sort": "price_asc"})
+        names = [b.name for b in resp.context["beans"]]
+        self.assertEqual(names[0], "ارزان")
