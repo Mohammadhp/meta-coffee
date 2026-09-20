@@ -20,8 +20,28 @@ every result links out to the seller.
 
 ## Curation
 
-Beans import as unverified drafts. In the Django admin, use "Mark selected as verified"
-to publish them (sets `is_verified=True` + `last_verified`). Gear is scraped/live.
+Beans import as verified only when the source reports them **in stock**
+(unknown-stock beans are also kept live). Out-of-stock beans drop off the
+public catalog automatically; nothing needs manual admin work for stock
+changes. (If you want to curate an out-of-stock bean back onto the site,
+verify it manually in the admin.)
+
+## Refreshing the catalog
+
+Scrape every source and re-import in one shot:
+
+    .venv/bin/python manage.py sync_catalog
+
+It runs `scraper/scrape.py`, then imports the resulting `scraper/catalog.jsonl`.
+Listings that vanish from a still-active seller's site are marked out-of-stock
+(a seller that returned zero records is assumed to be transiently down and is
+left untouched). For a daily automated refresh, add a crontab entry:
+
+    crontab -e
+    # 17 4 * * * /Users/mammad/git/meta-coffee/scripts/refresh.sh >> /Users/mammad/git/meta-coffee/scripts/refresh.log 2>&1
+
+(Adjust the path for your checkout. The `17 4` run time sits off the top of
+the hour to be polite to source sites.)
 
 ## Data
 

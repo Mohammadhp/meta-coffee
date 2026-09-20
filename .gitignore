@@ -7,3 +7,5 @@ scraper/catalog.xlsx
 scraper/~$*.xlsx
 .DS_Store
 .idea/
+.serena/
+*.log
