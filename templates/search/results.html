@@ -18,12 +18,13 @@
       {% if active.process %}<input type="hidden" name="process" value="{{ active.process }}">{% endif %}
       {% if active.format %}<input type="hidden" name="format" value="{{ active.format }}">{% endif %}
       {% if active.category %}<input type="hidden" name="category" value="{{ active.category }}">{% endif %}
+      {% if active.seller %}<input type="hidden" name="seller" value="{{ active.seller }}">{% endif %}
     </form>
   </div>
 
   <div class="type-toggle">
     <a class="{% if active.type != 'gear' %}active{% endif %}" href="?{% qs_with type='bean' category=None %}">دانه‌ها <span class="badge">{{ bean_count }}</span></a>
-    <a class="{% if active.type == 'gear' %}active{% endif %}" href="?{% qs_with type='gear' origin=None roast=None process=None format=None %}">تجهیزات <span class="badge">{{ gear_count }}</span></a>
+    <a class="{% if active.type == 'gear' %}active{% endif %}" href="?{% qs_with type='gear' origin=None roast=None process=None format=None seller=None %}">تجهیزات <span class="badge">{{ gear_count }}</span></a>
   </div>
 
   <div class="layout">
@@ -35,6 +36,10 @@
           <ul>{% for f in facets.gear_categories %}<li><a href="?{% qs_with category=f.value %}" {% if active.category == f.value %}class="active"{% endif %}><span>{{ f.label }}</span><span class="facet-count">{{ f.count }}</span></a></li>{% endfor %}</ul>
         </div>
       {% else %}
+        <div class="facet-group">
+          <h3>فروشنده</h3>
+          <ul>{% for f in facets.sellers %}<li><a href="?{% qs_with seller=f.value %}" {% if active.seller == f.value %}class="active"{% endif %}><span>{{ f.label }}</span><span class="facet-count">{{ f.count }}</span></a></li>{% endfor %}</ul>
+        </div>
         <div class="facet-group">
           <h3>خاستگاه</h3>
           <ul>{% for f in facets.origins %}<li><a href="?{% qs_with origin=f.value %}" {% if active.origin == f.value %}class="active"{% endif %}><span>{{ f.label }}</span><span class="facet-count">{{ f.count }}</span></a></li>{% endfor %}</ul>
@@ -62,7 +67,7 @@
           {% for g in gear %}
             <article class="card">
               <div class="name"><a href="{{ g.link|outbound }}" rel="nofollow noopener" target="_blank">{{ g.name }}</a></div>
-              <div class="seller">{{ g.seller.name }}</div>
+              <div class="seller"><a href="{% url 'seller_detail' g.seller.id %}">{{ g.seller.name }}</a></div>
               <div class="chips">
                 {% if g.category %}<span class="chip origin">{{ g.category }}</span>{% endif %}
               </div>
@@ -81,7 +86,7 @@
           {% for b in beans %}
             <article class="card">
               <div class="name"><a href="{{ b.link|outbound }}" rel="nofollow noopener" target="_blank">{{ b.name }}</a></div>
-              <div class="seller">{{ b.seller.name }}</div>
+              <div class="seller"><a href="{% url 'seller_detail' b.seller.id %}">{{ b.seller.name }}</a></div>
               <div class="chips">
                 {% if b.origin %}<span class="chip origin">{{ b.origin }}</span>{% endif %}
                 {% if b.roast_level %}<span class="chip">{{ b.roast_level }}</span>{% endif %}

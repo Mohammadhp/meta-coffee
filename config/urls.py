@@ -14,6 +14,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", home, name="home"),
     path("search/", catalog_views.search, name="search"),
+    path("sellers/", catalog_views.seller_index, name="seller_index"),
+    path("seller/<int:seller_id>/", catalog_views.seller_detail, name="seller_detail"),
     path("blog/", blog_views.index, name="blog_index"),
     path("blog/<slug:slug>/", blog_views.post_detail, name="blog_post"),
 ]

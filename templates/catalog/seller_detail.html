@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load listing_tags %}
+{% block title %}{{ seller.name }} — متاکافی{% endblock %}
+{% block content %}
+
+<header style="margin: 32px 0 24px;">
+  <h1 style="margin: 0 0 4px;">{{ seller.name }}</h1>
+  {% if seller.site_url %}
+    <a href="{{ seller.site_url|outbound }}" rel="nofollow noopener" target="_blank"
+       style="font-size: 0.95rem; direction: ltr; display: inline-block; unicode-bidi: embed;">
+      {{ seller.site_url }}
+    </a>
+  {% endif %}
+</header>
+
+{% if bean_count %}
+  <h2 class="section-title">دانه‌ها <span class="badge">{{ bean_count }}</span></h2>
+  <div class="grid">
+    {% for b in beans %}
+      <article class="card">
+        <div class="name"><a href="{{ b.link|outbound }}" rel="nofollow noopener" target="_blank">{{ b.name }}</a></div>
+        <div class="chips">
+          {% if b.origin %}<span class="chip origin">{{ b.origin }}</span>{% endif %}
+          {% if b.roast_level %}<span class="chip">{{ b.roast_level }}</span>{% endif %}
+          {% if b.process %}<span class="chip">{{ b.process }}</span>{% endif %}
+          {% if b.format %}<span class="chip">{{ b.format }}</span>{% endif %}
+        </div>
+        <div class="meta">
+          {% if b.price_toman %}<span class="price">{{ b.price_toman|fa_price }} <span class="unit">تومان</span></span>
+          {% else %}<span class="price">—</span>{% endif %}
+          {% if b.last_verified %}<span class="freshness">تأیید {{ b.last_verified|days_ago }}</span>{% endif %}
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% if gear_count %}
+  <h2 class="section-title">تجهیزات <span class="badge">{{ gear_count }}</span></h2>
+  <div class="grid">
+    {% for g in gear %}
+      <article class="card">
+        <div class="name"><a href="{{ g.link|outbound }}" rel="nofollow noopener" target="_blank">{{ g.name }}</a></div>
+        <div class="chips">
+          {% if g.category %}<span class="chip origin">{{ g.category }}</span>{% endif %}
+        </div>
+        <div class="meta">
+          {% if g.price_toman %}<span class="price">{{ g.price_toman|fa_price }} <span class="unit">تومان</span></span>
+          {% else %}<span class="price">—</span>{% endif %}
+          {% if g.last_crawled %}<span class="freshness">به‌روزرسانی {{ g.last_crawled|days_ago }}</span>{% endif %}
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% if not bean_count and not gear_count %}
+  <div class="empty"><strong>محصولی برای این فروشنده یافت نشد.</strong></div>
+{% endif %}
+
+{% endblock %}

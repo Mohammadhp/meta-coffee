@@ -1,8 +1,8 @@
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Count, Q
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
-from catalog.models import BeanListing, GearListing, SearchQuery
+from catalog.models import BeanListing, GearListing, SearchQuery, Seller
 
 
 def _int(v):
@@ -30,6 +30,7 @@ def search(request):
     process = request.GET.get("process", "")
     fmt = request.GET.get("format", "")
     category = request.GET.get("category", "")
+    seller_id = _int(request.GET.get("seller"))
     ftype = request.GET.get("type", "bean")
     min_price = _int(request.GET.get("min_price"))
     max_price = _int(request.GET.get("max_price"))
@@ -56,6 +57,18 @@ def search(request):
         "gear_categories": _facets(GearListing.objects.all(), "category"),
     }
 
+    # seller facets
+    seller_rows = (
+        bean_base
+        .values("seller_id", "seller__name")
+        .annotate(count=Count("id"))
+        .order_by("-count")
+    )
+    facets["sellers"] = [
+        {"value": str(r["seller_id"]), "label": r["seller__name"], "count": r["count"]}
+        for r in seller_rows
+    ]
+
     # apply filters
     if origin:
         beans = beans.filter(origin=origin)
@@ -65,8 +78,10 @@ def search(request):
         beans = beans.filter(process=process)
     if fmt:
         beans = beans.filter(format=fmt)
+    if seller_id:
+        beans = beans.filter(seller_id=seller_id)
     # Bean-level facets narrow results to beans; mixing unrelated gear in is noise.
-    if origin or roast or process or fmt:
+    if origin or roast or process or fmt or seller_id:
         gear = gear.none()
     if category:
         gear = gear.filter(category=category)
@@ -108,6 +123,7 @@ def search(request):
         "q": q, "origin": origin, "roast": roast, "process": process,
         "format": fmt, "category": category, "type": ftype,
         "min_price": min_price, "max_price": max_price, "sort": sort,
+        "seller": str(seller_id) if seller_id else "",
     }
     ctx = {
         "beans": beans[:60], "gear": gear[:60], "facets": facets,
@@ -115,3 +131,25 @@ def search(request):
         "bean_count": bean_count, "gear_count": gear_count,
     }
     return render(request, "search/results.html", ctx)
+
+
+def seller_index(request):
+    sellers = Seller.objects.annotate(
+        bean_count=Count("beans", filter=Q(beans__is_verified=True)),
+        gear_count=Count("gear"),
+    ).order_by("name")
+    return render(request, "catalog/seller_index.html", {"sellers": sellers})
+
+
+def seller_detail(request, seller_id):
+    seller = get_object_or_404(Seller, id=seller_id)
+    live = Q(in_stock=True) | Q(in_stock__isnull=True)
+    beans = seller.beans.filter(is_verified=True).filter(live).order_by("-updated_at")
+    gear = seller.gear.all().order_by("-updated_at")
+    return render(request, "catalog/seller_detail.html", {
+        "seller": seller,
+        "beans": beans,
+        "gear": gear,
+        "bean_count": beans.count(),
+        "gear_count": gear.count(),
+    })

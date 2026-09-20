@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load listing_tags %}
+{% block title %}فروشنده‌ها — متاکافی{% endblock %}
+{% block content %}
+
+<h1 class="page-title">فروشنده‌ها</h1>
+
+<div class="grid">
+  {% for s in sellers %}
+    <article class="card">
+      <div class="name">
+        <a href="{% url 'seller_detail' s.id %}">{{ s.name }}</a>
+      </div>
+      {% if s.site_url %}
+        <div class="seller" style="direction: ltr; text-align: right;">
+          <a href="{{ s.site_url|outbound }}" rel="nofollow noopener" target="_blank">{{ s.site_url }}</a>
+        </div>
+      {% endif %}
+      <div class="chips">
+        {% if s.bean_count %}<span class="chip origin">{{ s.bean_count }} دانه</span>{% endif %}
+        {% if s.gear_count %}<span class="chip">{{ s.gear_count }} تجهیزات</span>{% endif %}
+      </div>
+    </article>
+  {% empty %}
+    <div class="empty"><strong>فروشنده‌ای یافت نشد.</strong></div>
+  {% endfor %}
+</div>
+
+{% endblock %}
