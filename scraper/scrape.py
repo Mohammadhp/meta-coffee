@@ -253,7 +253,19 @@ def parse_woo_item(item, roaster):
     if weight is None:
         weight = extract_weight_g(name, " ".join(attr_texts))
 
-    origin = extract_origin(name, *cats, *tags, *attr_texts)
+    # Origin by signal strength: a dedicated origin attribute ("خاستگاه") and
+    # the product name are trustworthy; categories/tags are only a fallback,
+    # since SEO tags often list many origins ("خرید دانه قهوه اتیوپی، ...").
+    origin = None
+    for an, terms in attr_by_name.items():
+        if any(k in an for k in ("خاستگاه", "مبدا", "origin", "منشا")):
+            origin = extract_origin(*terms)
+            if origin:
+                break
+    if not origin:
+        origin = extract_origin(name)
+    if not origin:
+        origin = extract_origin(*cats, *tags, *attr_texts)
     # process/roast are only trusted from structured sources (name, attributes,
     # categories) — never from free-form description, which is where false
     # positives ("natural flavors", "medium body") come from.
