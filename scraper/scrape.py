@@ -377,6 +377,16 @@ def fetch_rio(client, site):
             price = parse_price(model.get("regular_price"))
             status = model.get("status_label", "")
             image_url = model.get("image") or ((model.get("images") or [None])[0])
+            # fallback: medias[0].disk + file_name (Rio Inertia pattern)
+            if not image_url:
+                medias = model.get("medias")
+                if isinstance(medias, list) and medias:
+                    m0 = medias[0]
+                    if isinstance(m0, dict):
+                        disk = m0.get("disk", "")
+                        fname = m0.get("file_name", "")
+                        if disk and fname:
+                            image_url = f"{base}/storage/{disk}{fname}"
             out.append({
                 "roaster": site["roaster"],
                 "product_name": name,
@@ -478,6 +488,11 @@ def fetch_sam(client, site):
             image_url = prod.get("image") or prod.get("featured_image") or prod.get("thumbnail")
             if isinstance(image_url, dict):
                 image_url = image_url.get("src") or image_url.get("url")
+            # fallback: gallery[0].url (Sam Coffee pattern)
+            if not image_url:
+                gallery = prod.get("gallery")
+                if isinstance(gallery, list) and gallery:
+                    image_url = gallery[0].get("url") if isinstance(gallery[0], dict) else None
             out.append({
                 "roaster": site["roaster"],
                 "product_name": name,
