@@ -274,6 +274,7 @@ def parse_woo_item(item, roaster):
     fmt = extract_format(name, *cats, *attr_texts)
 
     in_stock = bool(item.get("is_in_stock"))
+    image_url = ((item.get("images") or [{}])[0].get("src")) or None
 
     return {
         "roaster": roaster,
@@ -287,6 +288,7 @@ def parse_woo_item(item, roaster):
         "price_per_100g": round(price / (weight / 100), 0) if price and weight else None,
         "specialty_score": None,
         "in_stock": in_stock,
+        "image_url": image_url,
         "product_url": item.get("permalink"),
         "categories": "; ".join(cats),
         "description": re.sub(r"<[^>]+>", " ", desc + " " + short).strip()[:400],
@@ -299,7 +301,7 @@ def parse_woo_item(item, roaster):
 def fetch_woo_v2(client, base):
     items, page = [], 1
     while True:
-        r = client.get(f"{base}/wp-json/wp/v2/product", params={"per_page": 100, "page": page})
+        r = client.get(f"{base}/wp-json/wp/v2/product", params={"per_page": 100, "page": page, "_embed": ""})
         if r.status_code != 200:
             break
         batch = r.json()
@@ -323,6 +325,11 @@ def parse_woo_v2_item(item, roaster):
     name = re.sub(r"<[^>]+>", "", title).strip()
     text = " ".join([name, re.sub(r"<[^>]+>", " ", content), re.sub(r"<[^>]+>", " ", excerpt)])
     weight = extract_weight_g(name, text)
+    image_url = None
+    try:
+        image_url = item.get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url")
+    except (IndexError, KeyError, TypeError, AttributeError):
+        pass
     return {
         "roaster": roaster,
         "product_name": name,
@@ -335,6 +342,7 @@ def parse_woo_v2_item(item, roaster):
         "price_per_100g": None,
         "specialty_score": None,
         "in_stock": None,
+        "image_url": image_url,
         "product_url": item.get("link"),
         "categories": "",
         "description": re.sub(r"<[^>]+>", " ", content).strip()[:400],
@@ -368,6 +376,7 @@ def fetch_rio(client, site):
             weight = extract_weight_g(model.get("weight"), name)
             price = parse_price(model.get("regular_price"))
             status = model.get("status_label", "")
+            image_url = model.get("image") or ((model.get("images") or [None])[0])
             out.append({
                 "roaster": site["roaster"],
                 "product_name": name,
@@ -380,6 +389,7 @@ def fetch_rio(client, site):
                 "price_per_100g": round(price / (weight / 100), 0) if price and weight else None,
                 "specialty_score": None,
                 "in_stock": status == "موجود",
+                "image_url": image_url,
                 "product_url": u,
                 "categories": "; ".join(cat_names),
                 "description": "",
@@ -415,6 +425,8 @@ def fetch_lemm(client, site):
             price_m = re.search(r"([۰-۹][۰-۹,٬]*)\s*تومان", h)
             price = parse_price(price_m.group(1)) if price_m else None
             weight = extract_weight_g(name)
+            img_m = re.search(r'<img[^>]+src="([^"]+)"', h)
+            image_url = urljoin(u, img_m.group(1)) if img_m else None
             out.append({
                 "roaster": site["roaster"],
                 "product_name": name,
@@ -427,6 +439,7 @@ def fetch_lemm(client, site):
                 "price_per_100g": round(price / (weight / 100), 0) if price and weight else None,
                 "specialty_score": None,
                 "in_stock": None,
+                "image_url": image_url,
                 "product_url": u,
                 "categories": "",
                 "description": "",
@@ -461,6 +474,10 @@ def fetch_sam(client, site):
             text = " ".join([name, re.sub(r"<[^>]+>", " ", desc)])
             weight = extract_weight_g(name, text)
             labeled = extract_labeled_fields(desc)
+            # image: try common Next.js product data shapes
+            image_url = prod.get("image") or prod.get("featured_image") or prod.get("thumbnail")
+            if isinstance(image_url, dict):
+                image_url = image_url.get("src") or image_url.get("url")
             out.append({
                 "roaster": site["roaster"],
                 "product_name": name,
@@ -473,6 +490,7 @@ def fetch_sam(client, site):
                 "price_per_100g": round(price / (weight / 100), 0) if price and weight else None,
                 "specialty_score": labeled.get("score"),
                 "in_stock": bool(prod.get("available")),
+                "image_url": image_url if isinstance(image_url, str) else None,
                 "product_url": urljoin(base, slug),
                 "categories": "",
                 "description": re.sub(r"<[^>]+>", " ", desc).strip()[:400],

@@ -68,6 +68,32 @@ class ImportCatalogTest(TestCase):
         self.assertFalse(by_url[".../c"].is_verified)
         self.assertIsNone(by_url[".../c"].last_verified)
 
+    def test_imports_image_url(self):
+        path = self._write([self._bean(url=".../a", image_url="https://x.com/img.jpg")])
+        call_command("import_catalog", file=path, stdout=io.StringIO())
+        self.assertEqual(BeanListing.objects.get().image_url, "https://x.com/img.jpg")
+
+    def test_no_price_flags_unavailable(self):
+        gear = {
+            "roaster": "Cafe Raees", "product_name": "آسیاب دستی",
+            "origin": None, "process": None, "roast_level": None,
+            "format": None, "weight_g": None, "price_toman": None,
+            "price_per_100g": None, "specialty_score": None, "in_stock": True,
+            "categories": "آسیاب", "product_url": "https://raeescoffee.com/product/g",
+            "description": "y",
+        }
+        path = self._write([
+            self._bean(url=".../a", price_toman=None, in_stock=True),
+            self._bean(url=".../b", price_toman=None, in_stock=None),
+            gear,
+        ])
+        call_command("import_catalog", file=path, stdout=io.StringIO())
+        for b in BeanListing.objects.all():
+            self.assertFalse(b.in_stock)
+            self.assertFalse(b.is_verified)
+            self.assertIsNone(b.last_verified)
+        self.assertFalse(GearListing.objects.get().in_stock)
+
     def test_reimport_does_not_clobber_verified(self):
         bean = self._bean(in_stock=True)
         call_command("import_catalog", file=self._write([bean]), stdout=io.StringIO())

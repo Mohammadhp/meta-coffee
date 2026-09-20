@@ -59,10 +59,15 @@ class Command(BaseCommand):
                 )
                 seen_sellers.add(r["roaster"])
                 url = r.get("product_url", "")
-                # Auto-verify policy: a bean is live iff the source reports it
-                # in-stock (True) or unknown (None). Explicitly out-of-stock
-                # (False) beans drop out of the verified catalog.
-                live = r.get("in_stock") is not False
+                # Auto-verify policy: a listing is live iff the source reports
+                # it in-stock (True) or unknown (None) AND a price was
+                # extractable. No price means it can't be purchased, so it's
+                # flagged out-of-stock and drops out of the verified catalog.
+                price = r.get("price_toman")
+                in_stock = r.get("in_stock")
+                if price is None:
+                    in_stock = False
+                live = in_stock is not False
                 if r.get("origin"):
                     process = r["process"] if r.get("process") in BeanListing.Process.values else None
                     roast = r["roast_level"] if r.get("roast_level") in BeanListing.RoastLevel.values else None
@@ -77,11 +82,12 @@ class Command(BaseCommand):
                             "roast_level": roast,
                             "format": fmt,
                             "weight_g": r.get("weight_g"),
-                            "price_toman": r.get("price_toman"),
+                            "price_toman": price,
                             "price_per_100g": r.get("price_per_100g"),
                             "specialty_score": r.get("specialty_score"),
-                            "in_stock": r.get("in_stock"),
+                            "in_stock": in_stock,
                             "link": url,
+                            "image_url": r.get("image_url") or "",
                             "is_verified": live,
                             "last_verified": now if live else None,
                         },
@@ -95,10 +101,11 @@ class Command(BaseCommand):
                             "seller": seller,
                             "name": r["product_name"],
                             "category": _gear_category(r.get("categories")),
-                            "price_toman": r.get("price_toman"),
-                            "in_stock": r.get("in_stock"),
+                            "price_toman": price,
+                            "in_stock": in_stock,
                             "last_crawled": now,
                             "link": url,
+                            "image_url": r.get("image_url") or "",
                         },
                     )
                     seen_keys.add(url)

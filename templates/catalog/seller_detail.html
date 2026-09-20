@@ -18,6 +18,7 @@
   <div class="grid">
     {% for b in beans %}
       <article class="card">
+        {% if b.image_url %}<img src="{{ b.image_url }}" alt="{{ b.name }}" loading="lazy" referrerpolicy="no-referrer" class="card-img">{% endif %}
         <div class="name"><a href="{{ b.link|outbound }}" rel="nofollow noopener" target="_blank">{{ b.name }}</a></div>
         <div class="chips">
           {% if b.origin %}<span class="chip origin">{{ b.origin }}</span>{% endif %}
@@ -40,6 +41,7 @@
   <div class="grid">
     {% for g in gear %}
       <article class="card">
+        {% if g.image_url %}<img src="{{ g.image_url }}" alt="{{ g.name }}" loading="lazy" referrerpolicy="no-referrer" class="card-img">{% endif %}
         <div class="name"><a href="{{ g.link|outbound }}" rel="nofollow noopener" target="_blank">{{ g.name }}</a></div>
         <div class="chips">
           {% if g.category %}<span class="chip origin">{{ g.category }}</span>{% endif %}

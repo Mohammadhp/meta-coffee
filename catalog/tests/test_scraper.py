@@ -46,3 +46,31 @@ class WooOriginPriorityTest(TestCase):
     def test_name_still_works_without_attr(self):
         item = self._item(name="قهوه برزیل مدیوم")
         self.assertEqual(scrape.parse_woo_item(item, "Set Coffee")["origin"], "Brazil")
+
+
+class WooImageExtractionTest(TestCase):
+    def _item(self, **kw):
+        item = {
+            "name": "قهوه برزیل",
+            "categories": [], "tags": [], "attributes": [],
+            "prices": {"price": "1690000"},
+            "is_in_stock": True,
+            "permalink": "https://set-coffee.com/product/x",
+            "description": "", "short_description": "",
+        }
+        item.update(kw)
+        return item
+
+    def test_extracts_first_image_src(self):
+        item = self._item(images=[
+            {"src": "https://x.com/img1.jpg"},
+            {"src": "https://x.com/img2.jpg"},
+        ])
+        self.assertEqual(
+            scrape.parse_woo_item(item, "Set Coffee")["image_url"],
+            "https://x.com/img1.jpg",
+        )
+
+    def test_no_images_returns_none(self):
+        item = self._item()
+        self.assertIsNone(scrape.parse_woo_item(item, "Set Coffee")["image_url"])
