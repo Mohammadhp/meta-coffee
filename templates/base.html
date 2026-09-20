@@ -5,10 +5,34 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}متاکافی{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}جستجو و کشف قهوه — مقایسه قیمت، خاستگاه، برشت و تجهیزات میان فروشندگان معتبر ایران.{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}متاکافی{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}جستجو و کشف قهوه — مقایسه قیمت، خاستگاه، برشت و تجهیزات میان فروشندگان معتبر ایران.{% endblock %}">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+  <meta property="og:site_name" content="متاکافی">
+  {% block og_image %}{% endblock %}
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
   {% block extra_head %}{% endblock %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "متاکافی",
+    "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'home' %}",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "{{ request.scheme }}://{{ request.get_host }}{% url 'search' %}?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
 </head>
 <body>
   <header class="site-header">

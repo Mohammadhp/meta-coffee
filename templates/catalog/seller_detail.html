@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% load listing_tags %}
 {% block title %}{{ seller.name }} — متاکافی{% endblock %}
+{% block meta_description %}محصولات {{ seller.name }} در متاکافی — {% if bean_count %}{{ bean_count }} دانه قهوه{% endif %}{% if bean_count and gear_count %} و {% endif %}{% if gear_count %}{{ gear_count }} تجهیزات{% endif %}. مشاهده قیمت، موجودی و مشخصات.{% endblock %}
+{% block og_title %}{{ seller.name }} — متاکافی{% endblock %}
+{% block og_description %}محصولات {{ seller.name }} — {% if bean_count %}{{ bean_count }} دانه قهوه{% endif %}{% if bean_count and gear_count %} و {% endif %}{% if gear_count %}{{ gear_count }} تجهیزات{% endif %} در متاکافی.{% endblock %}
 {% block content %}
 
 <header style="margin: 32px 0 24px;">

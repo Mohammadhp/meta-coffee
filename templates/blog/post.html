@@ -1,8 +1,26 @@
 {% extends "base.html" %}
 {% block title %}{{ post.title }} — متاکافی{% endblock %}
+{% block meta_description %}{{ post.meta_description|default:post.title }} — مجله تخصصی قهوه متاکافی.{% endblock %}
+{% block og_title %}{{ post.title }}{% endblock %}
+{% block og_description %}{{ post.meta_description|default:post.title }}{% endblock %}
+{% block og_type %}article{% endblock %}
 {% block content %}
   <article class="article">
     <h1>{{ post.title }}</h1>
+    {% if post.published_at %}<p style="color: var(--ink-faint); font-size:0.88rem;">{{ post.published_at|date:"Y/m/d" }}</p>{% endif %}
     <div>{{ post.body|linebreaks }}</div>
   </article>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "{{ post.title|escapejs }}",
+    "description": "{{ post.meta_description|default:post.title|escapejs }}",
+    "datePublished": "{% if post.published_at %}{{ post.published_at|date:'c' }}{% endif %}",
+    "author": {
+      "@type": "Organization",
+      "name": "متاکافی"
+    }
+  }
+  </script>
 {% endblock %}

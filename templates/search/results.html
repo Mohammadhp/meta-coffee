@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% load listing_tags %}
 {% block title %}نتایج جستجو — متاکافی{% endblock %}
+{% block meta_description %}{% if active.q %}نتایج جستجوی "{{ active.q }}" در متاکافی — {{ total }} محصول از فروشندگان قهوه ایران.{% else %}مرور و فیلتر محصولات قهوه و تجهیزات در متاکافی — مقایسه قیمت و ویژگی‌ها میان فروشندگان معتبر ایران.{% endif %}{% endblock %}
+{% block og_title %}{% if active.q %}{{ active.q }} — متاکافی{% else %}جستجوی قهوه — متاکافی{% endif %}{% endblock %}
+{% block og_description %}{% if active.q %}نتایج جستجوی "{{ active.q }}" — {{ total }} محصول از فروشندگان قهوه ایران.{% else %}مرور و فیلتر محصولات قهوه و تجهیزات در متاکافی.{% endif %}{% endblock %}
 {% block content %}
   <div class="results-bar">
     <form class="search" action="{% url 'search' %}" method="get">
