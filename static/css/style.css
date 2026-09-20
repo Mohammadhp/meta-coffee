@@ -172,12 +172,18 @@ h1, h2, h3 { line-height: 1.4; font-weight: 700; color: var(--ink); }
 }
 
 .facet-group { margin-top: 18px; }
-.facet-group h3 {
+.facet-group summary {
   font-size: 0.9rem;
   color: var(--ink-soft);
-  margin: 0 0 8px;
+  margin: 0;
   font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
 }
+.facet-group summary::-webkit-details-marker { display: none; }
+.facet-group summary::marker { display: none; content: none; }
+.facet-group summary:hover { color: var(--brand); }
 
 .facet-group ul { list-style: none; margin: 0; padding: 0; }
 .facet-group li { margin: 4px 0; }

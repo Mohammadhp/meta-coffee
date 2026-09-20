@@ -31,31 +31,31 @@
     <aside class="facets">
       <h2>فیلترها</h2>
       {% if active.type == 'gear' %}
-        <div class="facet-group">
-          <h3>دسته</h3>
+        <details class="facet-group" {% if active.category %}open{% endif %}>
+          <summary>دسته</summary>
           <ul>{% for f in facets.gear_categories %}<li><a href="?{% qs_with category=f.value %}" {% if active.category == f.value %}class="active"{% endif %}><span>{{ f.label }}</span><span class="facet-count">{{ f.count }}</span></a></li>{% endfor %}</ul>
-        </div>
+        </details>
       {% else %}
-        <div class="facet-group">
-          <h3>فروشنده</h3>
+        <details class="facet-group" {% if active.seller %}open{% endif %}>
+          <summary>فروشنده</summary>
           <ul>{% for f in facets.sellers %}<li><a href="?{% qs_with seller=f.value %}" {% if active.seller == f.value %}class="active"{% endif %}><span>{{ f.label }}</span><span class="facet-count">{{ f.count }}</span></a></li>{% endfor %}</ul>
-        </div>
-        <div class="facet-group">
-          <h3>خاستگاه</h3>
+        </details>
+        <details class="facet-group" {% if active.origin %}open{% endif %}>
+          <summary>خاستگاه</summary>
           <ul>{% for f in facets.origins %}<li><a href="?{% qs_with origin=f.value %}" {% if active.origin == f.value %}class="active"{% endif %}><span>{{ f.label }}</span><span class="facet-count">{{ f.count }}</span></a></li>{% endfor %}</ul>
-        </div>
-        <div class="facet-group">
-          <h3>برشت</h3>
+        </details>
+        <details class="facet-group" {% if active.roast %}open{% endif %}>
+          <summary>برشت</summary>
           <ul>{% for f in facets.roasts %}<li><a href="?{% qs_with roast=f.value %}" {% if active.roast == f.value %}class="active"{% endif %}><span>{{ f.label }}</span><span class="facet-count">{{ f.count }}</span></a></li>{% endfor %}</ul>
-        </div>
-        <div class="facet-group">
-          <h3>فرآوری</h3>
+        </details>
+        <details class="facet-group" {% if active.process %}open{% endif %}>
+          <summary>فرآوری</summary>
           <ul>{% for f in facets.processes %}<li><a href="?{% qs_with process=f.value %}" {% if active.process == f.value %}class="active"{% endif %}><span>{{ f.label }}</span><span class="facet-count">{{ f.count }}</span></a></li>{% endfor %}</ul>
-        </div>
-        <div class="facet-group">
-          <h3>فرمت</h3>
+        </details>
+        <details class="facet-group" {% if active.format %}open{% endif %}>
+          <summary>فرمت</summary>
           <ul>{% for f in facets.formats %}<li><a href="?{% qs_with format=f.value %}" {% if active.format == f.value %}class="active"{% endif %}><span>{{ f.label }}</span><span class="facet-count">{{ f.count }}</span></a></li>{% endfor %}</ul>
-        </div>
+        </details>
       {% endif %}
     </aside>
 
