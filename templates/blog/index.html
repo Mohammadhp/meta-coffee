@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% block title %}مجله متاکافی{% endblock %}
 {% block content %}
-  <h1>مجله</h1>
-  <ul>
+  <h1 class="page-title">مجله</h1>
+  <ul class="post-list">
     {% for p in posts %}
       <li><a href="{{ p.get_absolute_url }}">{{ p.title }}</a></li>
     {% empty %}
-      <li>هنوز مطلبی منتشر نشده.</li>
+      <li class="empty"><strong>هنوز مطلبی منتشر نشده.</strong>به‌زودی مطالب آموزشی و راهنماهای قهوه اینجا قرار می‌گیرد.</li>
     {% endfor %}
   </ul>
 {% endblock %}

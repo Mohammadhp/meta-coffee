@@ -5,16 +5,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}متاکافی{% endblock %}</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
   {% block extra_head %}{% endblock %}
 </head>
 <body>
-  <header>
-    <nav>
-      <a href="{% url 'home' %}">متاکافی</a>
-      <a href="{% url 'search' %}">جستجو</a>
-      <a href="{% url 'blog_index' %}">مجله</a>
-    </nav>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="{% url 'home' %}" class="brand">متاکافی</a>
+      <nav class="site-nav">
+        <a href="{% url 'search' %}">جستجو</a>
+        <a href="{% url 'blog_index' %}">مجله</a>
+      </nav>
+    </div>
   </header>
-  <main>{% block content %}{% endblock %}</main>
+
+  <main class="container">{% block content %}{% endblock %}</main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>متاکافی — جستجو و کشف قهوه در ایران</p>
+    </div>
+  </footer>
 </body>
 </html>

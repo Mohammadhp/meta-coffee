@@ -2,55 +2,97 @@
 {% load listing_tags %}
 {% block title %}نتایج جستجو — متاکافی{% endblock %}
 {% block content %}
-  <form action="{% url 'search' %}" method="get">
-    <input type="text" name="q" value="{{ active.q }}">
-    <select name="sort">
+  <div class="results-bar">
+    <form class="search" action="{% url 'search' %}" method="get">
+      <input type="text" name="q" value="{{ active.q }}" placeholder="جستجوی قهوه و تجهیزات">
+      <button type="submit">جستجو</button>
+    </form>
+    <select name="sort" onchange="this.form.submit()">
       <option value="" {% if active.sort == "" %}selected{% endif %}>بهترین</option>
       <option value="price_asc" {% if active.sort == "price_asc" %}selected{% endif %}>ارزان‌ترین</option>
       <option value="price_desc" {% if active.sort == "price_desc" %}selected{% endif %}>گران‌ترین</option>
       <option value="newest" {% if active.sort == "newest" %}selected{% endif %}>جدیدترین</option>
     </select>
-    <button type="submit">جستجو</button>
-  </form>
-  <p>{{ total }} نتیجه</p>
+  </div>
 
-  <aside>
-    <h3>خاستگاه</h3>
-    <ul>{% for f in facets.origins %}<li><a href="?origin={{ f.value }}">{{ f.label }} ({{ f.count }})</a></li>{% endfor %}</ul>
-    <h3>برشت</h3>
-    <ul>{% for f in facets.roasts %}<li><a href="?roast={{ f.value }}">{{ f.label }} ({{ f.count }})</a></li>{% endfor %}</ul>
-    <h3>فرآوری</h3>
-    <ul>{% for f in facets.processes %}<li><a href="?process={{ f.value }}">{{ f.label }} ({{ f.count }})</a></li>{% endfor %}</ul>
-    <h3>دسته (تجهیزات)</h3>
-    <ul>{% for f in facets.gear_categories %}<li><a href="?category={{ f.value }}">{{ f.label }} ({{ f.count }})</a></li>{% endfor %}</ul>
-  </aside>
+  <div class="type-toggle">
+    <a class="{% if active.type != 'gear' %}active{% endif %}" href="?{% qs_with type='bean' category=None %}">دانه‌ها <span class="badge">{{ bean_count }}</span></a>
+    <a class="{% if active.type == 'gear' %}active{% endif %}" href="?{% qs_with type='gear' origin=None roast=None process=None format=None %}">تجهیزات <span class="badge">{{ gear_count }}</span></a>
+  </div>
 
-  <h2>دانه‌ها (اصالت‌دار)</h2>
-  <ul>
-    {% for b in beans %}
-      <li>
-        <a href="{{ b.link|outbound }}" rel="nofollow noopener" target="_blank">{{ b.name }}</a>
-        — {{ b.origin|default:"—" }} · {{ b.roast_level|default:"" }} · {{ b.process|default:"" }}
-        {% if b.price_toman %}({{ b.price_toman }} تومان){% endif %}
-        {% if b.last_verified %}· تأیید شده {{ b.last_verified|days_ago }}{% endif %}
-        <a href="?origin={{ b.origin }}">…</a>
-      </li>
-    {% empty %}
-      <li>دانه‌ای یافت نشد.</li>
-    {% endfor %}
-  </ul>
+  <div class="layout">
+    <aside class="facets">
+      <h2>فیلترها</h2>
+      {% if active.type == 'gear' %}
+        <div class="facet-group">
+          <h3>دسته</h3>
+          <ul>{% for f in facets.gear_categories %}<li><a href="?{% qs_with category=f.value %}" {% if active.category == f.value %}class="active"{% endif %}><span>{{ f.label }}</span><span class="facet-count">{{ f.count }}</span></a></li>{% endfor %}</ul>
+        </div>
+      {% else %}
+        <div class="facet-group">
+          <h3>خاستگاه</h3>
+          <ul>{% for f in facets.origins %}<li><a href="?{% qs_with origin=f.value %}" {% if active.origin == f.value %}class="active"{% endif %}><span>{{ f.label }}</span><span class="facet-count">{{ f.count }}</span></a></li>{% endfor %}</ul>
+        </div>
+        <div class="facet-group">
+          <h3>برشت</h3>
+          <ul>{% for f in facets.roasts %}<li><a href="?{% qs_with roast=f.value %}" {% if active.roast == f.value %}class="active"{% endif %}><span>{{ f.label }}</span><span class="facet-count">{{ f.count }}</span></a></li>{% endfor %}</ul>
+        </div>
+        <div class="facet-group">
+          <h3>فرآوری</h3>
+          <ul>{% for f in facets.processes %}<li><a href="?{% qs_with process=f.value %}" {% if active.process == f.value %}class="active"{% endif %}><span>{{ f.label }}</span><span class="facet-count">{{ f.count }}</span></a></li>{% endfor %}</ul>
+        </div>
+        <div class="facet-group">
+          <h3>فرمت</h3>
+          <ul>{% for f in facets.formats %}<li><a href="?{% qs_with format=f.value %}" {% if active.format == f.value %}class="active"{% endif %}><span>{{ f.label }}</span><span class="facet-count">{{ f.count }}</span></a></li>{% endfor %}</ul>
+        </div>
+      {% endif %}
+    </aside>
 
-  <h2>تجهیزات</h2>
-  <ul>
-    {% for g in gear %}
-      <li>
-        <a href="{{ g.link|outbound }}" rel="nofollow noopener" target="_blank">{{ g.name }}</a>
-        — {{ g.category|default:"—" }}
-        {% if g.price_toman %}({{ g.price_toman }} تومان){% endif %}
-        {% if g.last_crawled %}· به‌روزرسانی {{ g.last_crawled|days_ago }}{% endif %}
-      </li>
-    {% empty %}
-      <li>تجهیزاتی یافت نشد.</li>
-    {% endfor %}
-  </ul>
+    <section class="results">
+      <p class="results-count">{{ total }} نتیجه</p>
+
+      {% if active.type == 'gear' %}
+        <div class="grid">
+          {% for g in gear %}
+            <article class="card">
+              <div class="name"><a href="{{ g.link|outbound }}" rel="nofollow noopener" target="_blank">{{ g.name }}</a></div>
+              <div class="seller">{{ g.seller.name }}</div>
+              <div class="chips">
+                {% if g.category %}<span class="chip origin">{{ g.category }}</span>{% endif %}
+              </div>
+              <div class="meta">
+                {% if g.price_toman %}<span class="price">{{ g.price_toman|fa_price }} <span class="unit">تومان</span></span>
+                {% else %}<span class="price">—</span>{% endif %}
+                {% if g.last_crawled %}<span class="freshness">به‌روزرسانی {{ g.last_crawled|days_ago }}</span>{% endif %}
+              </div>
+            </article>
+          {% empty %}
+            <div class="empty"><strong>تجهیزاتی یافت نشد.</strong>فیلترها را تغییر دهید یا عبارت دیگری جستجو کنید.</div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="grid">
+          {% for b in beans %}
+            <article class="card">
+              <div class="name"><a href="{{ b.link|outbound }}" rel="nofollow noopener" target="_blank">{{ b.name }}</a></div>
+              <div class="seller">{{ b.seller.name }}</div>
+              <div class="chips">
+                {% if b.origin %}<span class="chip origin">{{ b.origin }}</span>{% endif %}
+                {% if b.roast_level %}<span class="chip">{{ b.roast_level }}</span>{% endif %}
+                {% if b.process %}<span class="chip">{{ b.process }}</span>{% endif %}
+                {% if b.format %}<span class="chip">{{ b.format }}</span>{% endif %}
+              </div>
+              <div class="meta">
+                {% if b.price_toman %}<span class="price">{{ b.price_toman|fa_price }} <span class="unit">تومان</span></span>
+                {% else %}<span class="price">—</span>{% endif %}
+                {% if b.last_verified %}<span class="freshness">تأیید {{ b.last_verified|days_ago }}</span>{% endif %}
+              </div>
+            </article>
+          {% empty %}
+            <div class="empty"><strong>دانه‌ای یافت نشد.</strong>فیلترها را تغییر دهید یا عبارت دیگری جستجو کنید.</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </section>
+  </div>
 {% endblock %}
