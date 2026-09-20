@@ -30,7 +30,7 @@ def search(request):
     process = request.GET.get("process", "")
     fmt = request.GET.get("format", "")
     category = request.GET.get("category", "")
-    ftype = request.GET.get("type", "")
+    ftype = request.GET.get("type", "bean")
     min_price = _int(request.GET.get("min_price"))
     max_price = _int(request.GET.get("max_price"))
     sort = request.GET.get("sort", "")
@@ -70,10 +70,6 @@ def search(request):
         gear = gear.none()
     if category:
         gear = gear.filter(category=category)
-    if ftype == "bean":
-        gear = gear.none()
-    elif ftype == "gear":
-        beans = beans.none()
     if min_price is not None:
         beans = beans.filter(price_toman__gte=min_price)
         gear = gear.filter(price_toman__gte=min_price)
@@ -87,6 +83,17 @@ def search(request):
     elif sort == "newest":
         beans, gear = beans.order_by("-updated_at"), gear.order_by("-updated_at")
 
+    # Counts for the type tabs are taken before the type split, so the
+    # inactive tab can still show how many matches it has.
+    bean_count = beans.count()
+    gear_count = gear.count()
+
+    # Mutual exclusivity: looking at one type hides the other.
+    if ftype == "gear":
+        beans = beans.none()
+    else:
+        gear = gear.none()
+
     total = beans.count() + gear.count()
     if q and total == 0:
         SearchQuery.objects.create(query_text=q)
@@ -99,5 +106,6 @@ def search(request):
     ctx = {
         "beans": beans[:60], "gear": gear[:60], "facets": facets,
         "active": active, "total": total,
+        "bean_count": bean_count, "gear_count": gear_count,
     }
     return render(request, "search/results.html", ctx)

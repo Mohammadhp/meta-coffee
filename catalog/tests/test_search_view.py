@@ -37,6 +37,17 @@ class SearchViewTest(TestCase):
         self.client.get(reverse("search"), {"q": "چیز ناموجود"})
         self.assertEqual(SearchQuery.objects.filter(query_text="چیز ناموجود").count(), 1)
 
+    def test_default_shows_beans_not_gear(self):
+        # looking at beans hides gear (mutual exclusivity, beans = default)
+        resp = self.client.get(reverse("search"))
+        self.assertContains(resp, self.verified.name)
+        self.assertNotContains(resp, self.gear.name)
+
+    def test_gear_type_shows_gear_not_beans(self):
+        resp = self.client.get(reverse("search"), {"type": "gear"})
+        self.assertContains(resp, self.gear.name)
+        self.assertNotContains(resp, self.verified.name)
+
     def test_price_sort(self):
         BeanListing.objects.create(
             seller=Seller.objects.get(name="Cafe Raees"), name="ارزان",
