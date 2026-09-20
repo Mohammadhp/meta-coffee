@@ -88,6 +88,12 @@ def search(request):
     bean_count = beans.count()
     gear_count = gear.count()
 
+    # Auto-switch to the tab that has results when the active tab is empty.
+    if ftype == "gear" and gear_count == 0 and bean_count > 0:
+        ftype = "bean"
+    elif ftype == "bean" and bean_count == 0 and gear_count > 0:
+        ftype = "gear"
+
     # Mutual exclusivity: looking at one type hides the other.
     if ftype == "gear":
         beans = beans.none()

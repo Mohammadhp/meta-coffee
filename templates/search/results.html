@@ -5,14 +5,20 @@
   <div class="results-bar">
     <form class="search" action="{% url 'search' %}" method="get">
       <input type="text" name="q" value="{{ active.q }}" placeholder="جستجوی قهوه و تجهیزات">
+      <select name="sort" onchange="this.form.submit()">
+        <option value="" {% if active.sort == "" %}selected{% endif %}>بهترین</option>
+        <option value="price_asc" {% if active.sort == "price_asc" %}selected{% endif %}>ارزان‌ترین</option>
+        <option value="price_desc" {% if active.sort == "price_desc" %}selected{% endif %}>گران‌ترین</option>
+        <option value="newest" {% if active.sort == "newest" %}selected{% endif %}>جدیدترین</option>
+      </select>
       <button type="submit">جستجو</button>
+      <input type="hidden" name="type" value="{{ active.type }}">
+      {% if active.origin %}<input type="hidden" name="origin" value="{{ active.origin }}">{% endif %}
+      {% if active.roast %}<input type="hidden" name="roast" value="{{ active.roast }}">{% endif %}
+      {% if active.process %}<input type="hidden" name="process" value="{{ active.process }}">{% endif %}
+      {% if active.format %}<input type="hidden" name="format" value="{{ active.format }}">{% endif %}
+      {% if active.category %}<input type="hidden" name="category" value="{{ active.category }}">{% endif %}
     </form>
-    <select name="sort" onchange="this.form.submit()">
-      <option value="" {% if active.sort == "" %}selected{% endif %}>بهترین</option>
-      <option value="price_asc" {% if active.sort == "price_asc" %}selected{% endif %}>ارزان‌ترین</option>
-      <option value="price_desc" {% if active.sort == "price_desc" %}selected{% endif %}>گران‌ترین</option>
-      <option value="newest" {% if active.sort == "newest" %}selected{% endif %}>جدیدترین</option>
-    </select>
   </div>
 
   <div class="type-toggle">

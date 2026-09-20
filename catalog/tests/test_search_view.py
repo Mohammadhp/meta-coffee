@@ -56,3 +56,27 @@ class SearchViewTest(TestCase):
         resp = self.client.get(reverse("search"), {"sort": "price_asc"})
         names = [b.name for b in resp.context["beans"]]
         self.assertEqual(names[0], "ارزان")
+
+    def test_auto_switches_to_gear_when_beans_empty(self):
+        """A gear-only search on the default bean tab auto-switches to gear."""
+        resp = self.client.get(reverse("search"), {"q": "آسیاب"})
+        self.assertEqual(resp.context["active"]["type"], "gear")
+        self.assertContains(resp, self.gear.name)
+        self.assertNotContains(resp, self.verified.name)
+
+    def test_auto_switches_to_beans_when_gear_empty(self):
+        """A bean-only search on the gear tab auto-switches to beans."""
+        # "شکلاتی" is only in the bean name, not in the gear name
+        resp = self.client.get(reverse("search"),
+                               {"q": "شکلاتی", "type": "gear"})
+        self.assertEqual(resp.context["active"]["type"], "bean")
+        self.assertContains(resp, self.verified.name)
+        self.assertNotContains(resp, self.gear.name)
+
+    def test_no_auto_switch_when_both_have_results(self):
+        """When both tabs have results, stay on the requested tab."""
+        # "قهوه" isn't in either name, but both are the only items so
+        # trigram might match.  Use default (beans) and verify it stays.
+        resp = self.client.get(reverse("search"))
+        # Default tab is bean, both have results, should stay on bean
+        self.assertEqual(resp.context["active"]["type"], "bean")
