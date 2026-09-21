@@ -54,7 +54,7 @@ class SearchViewTest(TestCase):
             is_verified=True, price_toman=100_000, source_key="https://r.example/cheap",
             link="https://r.example/cheap")
         resp = self.client.get(reverse("search"), {"sort": "price_asc"})
-        names = [b.name for b in resp.context["beans"]]
+        names = [b.name for b in resp.context["page"]]
         self.assertEqual(names[0], "ارزان")
 
     def test_auto_switches_to_gear_when_beans_empty(self):

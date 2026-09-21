@@ -1,4 +1,5 @@
 from django.contrib.postgres.search import TrigramSimilarity
+from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, render
 
@@ -119,6 +120,15 @@ def search(request):
     if q and total == 0:
         SearchQuery.objects.create(query_text=q)
 
+    page_num = _int(request.GET.get("page")) or 1
+    page_size = 40
+    qs = (gear if ftype == "gear" else beans).order_by("-updated_at")
+    paginator = Paginator(qs, page_size)
+    try:
+        page = paginator.page(page_num)
+    except EmptyPage:
+        page = paginator.page(1)
+
     active = {
         "q": q, "origin": origin, "roast": roast, "process": process,
         "format": fmt, "category": category, "type": ftype,
@@ -126,7 +136,7 @@ def search(request):
         "seller": str(seller_id) if seller_id else "",
     }
     ctx = {
-        "beans": beans[:60], "gear": gear[:60], "facets": facets,
+        "page": page, "facets": facets,
         "active": active, "total": total,
         "bean_count": bean_count, "gear_count": gear_count,
     }

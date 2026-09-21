@@ -33,6 +33,9 @@
   <div class="layout">
     <aside class="facets">
       <h2>فیلترها</h2>
+      {% if active.origin or active.roast or active.process or active.format or active.category or active.seller or active.q or active.sort %}
+        <a href="{% url 'search' %}?type={{ active.type }}" class="btn btn-reset">حذف همه فیلترها</a>
+      {% endif %}
       {% if active.type == 'gear' %}
         <details class="facet-group" {% if active.category %}open{% endif %}>
           <summary>دسته</summary>
@@ -67,7 +70,7 @@
 
       {% if active.type == 'gear' %}
         <div class="grid">
-          {% for g in gear %}
+          {% for g in page %}
             <article class="card">
               {% if g.image_url %}<img src="{{ g.image_url }}" alt="{{ g.name }}" loading="lazy" referrerpolicy="no-referrer" class="card-img" onerror="this.style.display='none'">{% endif %}
               <div class="name"><a href="{{ g.link|outbound }}" rel="nofollow noopener" target="_blank">{{ g.name }}</a></div>
@@ -87,7 +90,7 @@
         </div>
       {% else %}
         <div class="grid">
-          {% for b in beans %}
+          {% for b in page %}
             <article class="card">
               {% if b.image_url %}<img src="{{ b.image_url }}" alt="{{ b.name }}" loading="lazy" referrerpolicy="no-referrer" class="card-img" onerror="this.style.display='none'">{% endif %}
               <div class="name"><a href="{{ b.link|outbound }}" rel="nofollow noopener" target="_blank">{{ b.name }}</a></div>
@@ -108,6 +111,26 @@
             <div class="empty"><strong>دانه‌ای یافت نشد.</strong>فیلترها را تغییر دهید یا عبارت دیگری جستجو کنید.</div>
           {% endfor %}
         </div>
+      {% endif %}
+
+      {% if page.paginator.num_pages > 1 %}
+        <nav class="pagination">
+          {% if page.has_previous %}
+            <a href="?{% qs_with page=page.previous_page_number %}" class="page-link">&laquo; قبلی</a>
+          {% endif %}
+          {% for n in page.paginator.page_range %}
+            {% if n == page.number %}
+              <span class="page-link active">{{ n }}</span>
+            {% elif n <= 3 or n > page.paginator.num_pages|add:"-3" or n > page.number|add:"-3" and n < page.number|add:"3" %}
+              <a href="?{% qs_with page=n %}" class="page-link">{{ n }}</a>
+            {% elif n == 4 or n == page.paginator.num_pages|add:"-4" %}
+              <span class="page-link dots">…</span>
+            {% endif %}
+          {% endfor %}
+          {% if page.has_next %}
+            <a href="?{% qs_with page=page.next_page_number %}" class="page-link">بعدی &raquo;</a>
+          {% endif %}
+        </nav>
       {% endif %}
     </section>
   </div>
