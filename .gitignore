@@ -9,3 +9,4 @@ scraper/~$*.xlsx
 .idea/
 .serena/
 *.log
+staticfiles/

@@ -43,6 +43,55 @@ left untouched). For a daily automated refresh, add a crontab entry:
 (Adjust the path for your checkout. The `17 4` run time sits off the top of
 the hour to be polite to source sites.)
 
+## Production deployment
+
+### 1. Prepare the server
+
+```bash
+# Clone the repo on the target server
+git clone https://github.com/Mohammadhp/meta-coffee.git
+cd meta-coffee
+
+# Create .env for production
+cp .env.example .env
+# Edit .env — set DEBUG=False, a real SECRET_KEY, and your domain:
+#   ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
+#   CSRF_TRUSTED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+#   DB_HOST=db
+#   DB_PORT=5432
+```
+
+### 2. Update Caddyfile
+
+Replace `YOUR_DOMAIN` with your actual domain and uncomment `tls`:
+
+```
+yourdomain.com, www.yourdomain.com {
+    tls you@example.com
+    reverse_proxy web:8000
+    ...
+}
+```
+
+### 3. Start
+
+```bash
+docker compose up -d --build
+docker compose exec web python manage.py migrate
+docker compose exec web python manage.py import_catalog  # seed data
+docker compose exec web python manage.py createsuperuser
+```
+
+### 4. Schedule daily refresh
+
+```bash
+# On the server, add a cron job to refresh the catalog daily:
+crontab -e
+# 17 4 * * * cd /path/to/meta-coffee && docker compose exec -T web python manage.py sync_catalog >> logs/refresh.log 2>&1
+```
+
+Caddy handles HTTPS automatically via Let's Encrypt. No manual cert setup needed.
+
 ## Data
 
-Source catalog: scraper/catalog.jsonl (19 roasters, 2157 products, 474 beans, 1683 gear).
+Source catalog: scraper/catalog.jsonl (19 roasters, ~2300 products).

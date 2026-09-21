@@ -1,0 +1,14 @@
+.venv/
+.git/
+.gitignore
+.env
+*.pyc
+__pycache__/
+.serena/
+*.log
+scraper/catalog.xlsx
+scraper/~$*.xlsx
+.DS_Store
+.idea/
+.ssh/
+docker-compose.yml

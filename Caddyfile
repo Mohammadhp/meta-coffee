@@ -1,0 +1,21 @@
+# Replace YOUR_DOMAIN with the actual domain (e.g. metacoffee.ir).
+# Caddy gets HTTPS certs automatically via Let's Encrypt.
+#
+# To run without a domain yet (IP-only):
+#   Replace the first line with:  :80 {
+#   And delete the second line (tls ...).
+
+YOUR_DOMAIN {
+    # Set your email for Let's Encrypt notifications:
+    # tls you@example.com
+
+    reverse_proxy web:8000
+
+    encode gzip
+
+    header {
+        X-Frame-Options DENY
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+}
