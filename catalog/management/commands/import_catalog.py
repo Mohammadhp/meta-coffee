@@ -68,7 +68,16 @@ class Command(BaseCommand):
                 if price is None:
                     in_stock = False
                 live = in_stock is not False
-                if r.get("origin"):
+                # Classify as a bean when origin is known OR bean-specific fields
+                # are present (blends, decaf etc. may lack origin but still are
+                # coffee beans — they have roast_level / process / format).
+                is_bean = (
+                    r.get("origin")
+                    or r.get("roast_level") in BeanListing.RoastLevel.values
+                    or r.get("process") in BeanListing.Process.values
+                    or r.get("format") in BeanListing.BeansFormat.values
+                )
+                if is_bean:
                     process = r["process"] if r.get("process") in BeanListing.Process.values else None
                     roast = r["roast_level"] if r.get("roast_level") in BeanListing.RoastLevel.values else None
                     fmt = r["format"] if r.get("format") in BeanListing.BeansFormat.values else None

@@ -37,31 +37,55 @@ def search(request):
     max_price = _int(request.GET.get("max_price"))
     sort = request.GET.get("sort", "")
 
-    beans = BeanListing.objects.filter(
-        is_verified=True
-    ).filter(Q(in_stock=True) | Q(in_stock__isnull=True))
-    gear = GearListing.objects.all()
+    # ---- helpers for building bean querysets ----
+    def _bean_base():
+        return BeanListing.objects.filter(
+            is_verified=True,
+        ).filter(Q(in_stock=True) | Q(in_stock__isnull=True))
 
-    if q:
-        beans = beans.annotate(_sim=TrigramSimilarity("name", q)).filter(_sim__gt=0.2)
-        gear = gear.annotate(_sim=TrigramSimilarity("name", q)).filter(_sim__gt=0.2)
-        beans = beans.order_by("-_sim")
-        gear = gear.order_by("-_sim")
+    def _apply_q(qs):
+        if q:
+            return qs.annotate(
+                _sim=TrigramSimilarity("name", q),
+            ).filter(_sim__gt=0.2)
+        return qs
 
-    # facets computed from the full verified catalog (independent of filters)
-    bean_base = BeanListing.objects.filter(is_verified=True)
+    def _apply_bean_filters(qs, skip=None):
+        """Apply all active bean filters *except* the one named by `skip`.
+
+        This is the drill-down faceting primitive — when ``skip`` is the
+        current facet's name, its filter is omitted so the facet can show
+        counts across all values of that dimension (narrowed by every *other*
+        active filter)."""
+        qs = _apply_q(qs)
+        if min_price is not None:
+            qs = qs.filter(price_toman__gte=min_price)
+        if max_price is not None:
+            qs = qs.filter(price_toman__lte=max_price)
+        if origin and skip != "origin":
+            qs = qs.filter(origin=origin)
+        if roast and skip != "roast":
+            qs = qs.filter(roast_level=roast)
+        if process and skip != "process":
+            qs = qs.filter(process=process)
+        if fmt and skip != "format":
+            qs = qs.filter(format=fmt)
+        if seller_id and skip != "seller":
+            qs = qs.filter(seller_id=seller_id)
+        return qs
+
+    # ---- facets (drill-down: each group skips its own filter) ----
     facets = {
-        "origins": _facets(bean_base, "origin"),
-        "roasts": _facets(bean_base, "roast_level"),
-        "processes": _facets(bean_base, "process"),
-        "formats": _facets(bean_base, "format"),
-        "gear_categories": _facets(GearListing.objects.all(), "category"),
+        "origins": _facets(_apply_bean_filters(_bean_base(), "origin"), "origin"),
+        "roasts": _facets(_apply_bean_filters(_bean_base(), "roast"), "roast_level"),
+        "processes": _facets(_apply_bean_filters(_bean_base(), "process"), "process"),
+        "formats": _facets(_apply_bean_filters(_bean_base(), "format"), "format"),
     }
 
-    # seller facets
+    # seller facet
+    seller_qs = _apply_bean_filters(_bean_base(), "seller")
     seller_rows = (
-        bean_base
-        .values("seller_id", "seller__name")
+        seller_qs.values("seller_id", "seller__name")
         .annotate(count=Count("id"))
         .order_by("-count")
     )
@@ -70,34 +94,45 @@ def search(request):
         for r in seller_rows
     ]
 
-    # apply filters
-    if origin:
-        beans = beans.filter(origin=origin)
-    if roast:
-        beans = beans.filter(roast_level=roast)
-    if process:
-        beans = beans.filter(process=process)
-    if fmt:
-        beans = beans.filter(format=fmt)
-    if seller_id:
-        beans = beans.filter(seller_id=seller_id)
-    # Bean-level facets narrow results to beans; mixing unrelated gear in is noise.
+    # gear category facet (gear doesn't carry bean-specific filters)
+    gear_facet_qs = GearListing.objects.all()
+    if q:
+        gear_facet_qs = gear_facet_qs.annotate(
+            _sim=TrigramSimilarity("name", q),
+        ).filter(_sim__gt=0.2)
+    if min_price is not None:
+        gear_facet_qs = gear_facet_qs.filter(price_toman__gte=min_price)
+    if max_price is not None:
+        gear_facet_qs = gear_facet_qs.filter(price_toman__lte=max_price)
+    facets["gear_categories"] = _facets(gear_facet_qs, "category")
+
+    # ---- results (all filters applied) ----
+    beans = _apply_bean_filters(_bean_base())
+    gear = GearListing.objects.all()
     if origin or roast or process or fmt or seller_id:
         gear = gear.none()
-    if category:
-        gear = gear.filter(category=category)
-    if min_price is not None:
-        beans = beans.filter(price_toman__gte=min_price)
-        gear = gear.filter(price_toman__gte=min_price)
-    if max_price is not None:
-        beans = beans.filter(price_toman__lte=max_price)
-        gear = gear.filter(price_toman__lte=max_price)
+    else:
+        gear = _apply_q(gear)
+        if category:
+            gear = gear.filter(category=category)
+        if min_price is not None:
+            gear = gear.filter(price_toman__gte=min_price)
+        if max_price is not None:
+            gear = gear.filter(price_toman__lte=max_price)
+
+    # sort
     if sort == "price_asc":
-        beans, gear = beans.order_by("price_toman"), gear.order_by("price_toman")
+        beans = beans.order_by("price_toman")
+        gear = gear.order_by("price_toman")
     elif sort == "price_desc":
-        beans, gear = beans.order_by("-price_toman"), gear.order_by("-price_toman")
+        beans = beans.order_by("-price_toman")
+        gear = gear.order_by("-price_toman")
     elif sort == "newest":
-        beans, gear = beans.order_by("-updated_at"), gear.order_by("-updated_at")
+        beans = beans.order_by("-updated_at")
+        gear = gear.order_by("-updated_at")
+    elif q:
+        beans = beans.order_by("-_sim")
+        gear = gear.order_by("-_sim")
 
     # Counts for the type tabs are taken before the type split, so the
     # inactive tab can still show how many matches it has.
