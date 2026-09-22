@@ -53,6 +53,7 @@ SITES = [
     {"roaster": "Rio", "base": "https://www.rio.coffee", "type": "rio"},
     {"roaster": "Lemm Coffee", "base": "https://lemm.coffee", "type": "lemm"},
     {"roaster": "Sam Coffee Roasters", "base": "https://www.samcoffeeroasters.com", "type": "sam"},
+    {"roaster": "TDS Roastery", "base": "https://www.tds-roastery.com", "type": "tds"},
 ]
 
 # Persian digit normalization
@@ -516,6 +517,64 @@ def fetch_sam(client, site):
     return out
 
 
+# ---------------------------------------------------------------------------
+# TDS (Next.js + JSON-LD structured data)
+# ---------------------------------------------------------------------------
+def fetch_tds(client, site):
+    base = site["base"].rstrip("/")
+    r = client.get(f"{base}/products")
+    slugs = sorted(set(re.findall(r'href=["\'](/products/[a-z0-9-]+)["\']', r.text)))
+    out = []
+    for slug in slugs:
+        try:
+            r = client.get(urljoin(base, slug))
+            m = re.search(r'<script type="application/ld\+json">(.*?)</script>', r.text, re.S)
+            if not m:
+                continue
+            ld = json.loads(m.group(1))
+            name = ld.get("name") or ""
+            desc = ld.get("description") or ""
+            price = parse_price(int(ld["offers"]["price"])) if "offers" in ld and ld["offers"].get("price") else None
+            in_stock = ld.get("offers", {}).get("availability") == "https://schema.org/InStock"
+            img = ld.get("image") or ""
+            image_url = urljoin(base, img) if img and not img.startswith("http") else (img or None)
+            # Process from additionalProperty
+            props = ld.get("additionalProperty") or []
+            process = None
+            variety = ""
+            for p in props:
+                pn = (p.get("name") or "").lower()
+                pv = p.get("value") or ""
+                if pn == "process":
+                    process = extract_process(pv)
+                elif pn == "variety":
+                    variety = pv
+            text = " ".join([name, desc, variety])
+            weight = extract_weight_g(name, text)
+            origin = extract_origin(name, desc, variety, ld.get("category") or "")
+            out.append({
+                "roaster": site["roaster"],
+                "product_name": name.strip(),
+                "origin": origin,
+                "process": process or extract_process(name, desc),
+                "roast_level": extract_roast(name, desc),
+                "format": extract_format(name, desc),
+                "weight_g": weight,
+                "price_toman": price,
+                "price_per_100g": round(price / (weight / 100), 0) if price and weight else None,
+                "specialty_score": None,
+                "in_stock": in_stock,
+                "image_url": image_url,
+                "product_url": urljoin(base, slug),
+                "categories": "",
+                "description": desc[:400],
+            })
+        except Exception:
+            continue
+        time.sleep(0.1)
+    return out
+
+
 def main():
     results = []
     client = httpx.Client(timeout=30, follow_redirects=True, headers=UA)
@@ -538,6 +597,8 @@ def main():
                 parsed = fetch_lemm(client, site)
             elif t == "sam":
                 parsed = fetch_sam(client, site)
+            elif t == "tds":
+                parsed = fetch_tds(client, site)
             else:
                 parsed = []
             results.extend(parsed)
