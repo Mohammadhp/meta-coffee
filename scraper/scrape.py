@@ -45,6 +45,7 @@ SITES = [
     {"roaster": "Kazhvan Coffee", "base": "https://kazhvancoffee.com", "type": "woo"},
     {"roaster": "Set Coffee", "base": "https://set-coffee.com", "type": "woo"},
     {"roaster": "Redpill Roastery", "base": "https://redpillroastery.coffee", "type": "woo"},
+    {"roaster": "Moa Coffee", "base": "https://moa.coffee", "type": "woo"},
     # Luya uses the older store endpoint
     {"roaster": "Luya Coffee", "base": "https://luyacoffee.com", "type": "woo-old"},
     # Lamiz: store API under-reports (33 vs 187); use wp/v2 for full list.
