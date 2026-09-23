@@ -24,7 +24,7 @@ class ImportCatalogTest(TestCase):
         gear = {
             "roaster": "Cafe Raees", "product_name": "آسیاب دستی",
             "origin": None, "process": None, "roast_level": None,
-            "format": "Ground", "weight_g": None, "price_toman": 1500000,
+            "format": None, "weight_g": None, "price_toman": 1500000,
             "price_per_100g": None, "specialty_score": None, "in_stock": True,
             "categories": "آسیاب; ابزار", "product_url": "https://raeescoffee.com/product/b",
             "description": "y",

@@ -111,7 +111,7 @@ ROAST_TERMS = {
 
 FORMAT_TERMS = {
     "whole bean": "Whole bean", "دان": "Whole bean", "دانه": "Whole bean", "beans": "Whole bean",
-    "ground": "Ground", "آسیاب": "Ground", "پودر": "Ground", "اسپرسو (پودر)": "Ground",
+    "ground": "Ground", "پودر": "Ground", "اسپرسو (پودر)": "Ground",
     "capsule": "Capsule", "کپسول": "Capsule", "پاد": "Pod", "pod": "Pod",
 }
 
