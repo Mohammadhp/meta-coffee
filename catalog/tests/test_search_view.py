@@ -22,6 +22,12 @@ class SearchViewTest(TestCase):
             seller=s, name="آسیاب برقی x", category="grinder",
             source_key="https://r.example/g", link="https://r.example/g",
         )
+        cls.ethiopia = BeanListing.objects.create(
+            seller=s, name="اتیوپی ییرگاچف", origin="Ethiopia",
+            process="Washed", roast_level="Light", price_toman=3_000_000,
+            is_verified=True,
+            source_key="https://r.example/e", link="https://r.example/e",
+        )
 
     def test_verified_beans_only(self):
         resp = self.client.get(reverse("search"))
@@ -80,3 +86,25 @@ class SearchViewTest(TestCase):
         resp = self.client.get(reverse("search"))
         # Default tab is bean, both have results, should stay on bean
         self.assertEqual(resp.context["active"]["type"], "bean")
+
+    def test_facets_are_global_when_unfiltered(self):
+        resp = self.client.get(reverse("search"))
+        roasts = {f["value"]: f["count"] for f in resp.context["facets"]["roasts"]}
+        # Both Brazil (Medium) and Ethiopia (Light) beans are verified
+        self.assertEqual(roasts.get("Medium"), 1)
+        self.assertEqual(roasts.get("Light"), 1)
+
+    def test_facets_narrow_with_active_origin_filter(self):
+        """Selecting origin=Brazil narrows the roast facet to Brazil's roasts."""
+        resp = self.client.get(reverse("search"), {"origin": "Brazil"})
+        roasts = {f["value"]: f["count"] for f in resp.context["facets"]["roasts"]}
+        # Only the Brazil bean (Medium) remains; Ethiopia's Light is excluded
+        self.assertEqual(roasts.get("Medium"), 1)
+        self.assertNotIn("Light", roasts)
+
+    def test_origin_facet_not_narrowed_by_its_own_filter(self):
+        """The origin facet itself stays global even when origin is selected."""
+        resp = self.client.get(reverse("search"), {"origin": "Brazil"})
+        origins = {f["value"]: f["count"] for f in resp.context["facets"]["origins"]}
+        self.assertEqual(origins.get("Brazil"), 1)
+        self.assertEqual(origins.get("Ethiopia"), 1)
