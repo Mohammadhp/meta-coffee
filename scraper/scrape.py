@@ -116,36 +116,43 @@ FORMAT_TERMS = {
 }
 
 
-def extract_origin(*texts):
-    hay = " ".join(t for t in texts if t).lower()
-    for key, val in ORIGIN_MAP.items():
-        if key.lower() in hay:
-            return val
+def _word_match(keyword, text):
+    """Match *keyword* as a whole word in *text*, not as a substring.
+
+    "یمن" matches ``قهوه یمن`` but not ``آندیمند``.
+    ``\\w`` does not cover Persian letters, so the boundary is any
+    ASCII letter + the Persian Unicode block (U+0600–U+06FF)."""
+    kw = re.escape(keyword.lower())
+    # letter chars on either side → substring, not a standalone word
+    boundary = r"(?<![a-z؀-ۿ])"
+    return bool(re.search(boundary + kw + boundary, text.lower()))
+
+
+def _extract_term(term_map, *texts):
+    """Return the first mapped value whose key appears as a whole word in *texts*."""
+    for text in texts:
+        if not text:
+            continue
+        for key, val in term_map.items():
+            if _word_match(key, text):
+                return val
     return None
+
+
+def extract_origin(*texts):
+    return _extract_term(ORIGIN_MAP, *texts)
 
 
 def extract_process(*texts):
-    hay = " ".join(t for t in texts if t).lower()
-    for key, val in PROCESS_TERMS.items():
-        if key.lower() in hay:
-            return val
-    return None
+    return _extract_term(PROCESS_TERMS, *texts)
 
 
 def extract_roast(*texts):
-    hay = " ".join(t for t in texts if t).lower()
-    for key, val in ROAST_TERMS.items():
-        if key.lower() in hay:
-            return val
-    return None
+    return _extract_term(ROAST_TERMS, *texts)
 
 
 def extract_format(*texts):
-    hay = " ".join(t for t in texts if t).lower()
-    for key, val in FORMAT_TERMS.items():
-        if key.lower() in hay:
-            return val
-    return None
+    return _extract_term(FORMAT_TERMS, *texts)
 
 
 FA_WORD_NUM = {
