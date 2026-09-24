@@ -94,6 +94,48 @@ class ImportCatalogTest(TestCase):
             self.assertIsNone(b.last_verified)
         self.assertFalse(GearListing.objects.get().in_stock)
 
+    def test_classification_flip_removes_stale_other_table_row(self):
+        """A product that reclassifies gear->bean (or back) must not leave
+        a stale duplicate in the other table."""
+        # First import: no bean signal -> gear
+        call_command("import_catalog", file=self._write([
+            self._bean(url=".../a", origin=None, process=None,
+                       roast_level=None, format=None),
+        ]), stdout=io.StringIO())
+        self.assertEqual(GearListing.objects.count(), 1)
+        self.assertEqual(BeanListing.objects.count(), 0)
+        # Second import: same URL now carries a bean signal -> bean
+        call_command("import_catalog", file=self._write([
+            self._bean(url=".../a"),
+        ]), stdout=io.StringIO())
+        self.assertEqual(BeanListing.objects.count(), 1)
+        self.assertEqual(GearListing.objects.count(), 0)
+        # And back to gear again
+        call_command("import_catalog", file=self._write([
+            self._bean(url=".../a", origin=None, process=None,
+                       roast_level=None, format=None),
+        ]), stdout=io.StringIO())
+        self.assertEqual(GearListing.objects.count(), 1)
+        self.assertEqual(BeanListing.objects.count(), 0)
+
+    def test_gear_name_vetoes_bean_classification(self):
+        """A grinder named with a false roast signal stays gear; ground
+        coffee phrased as 'آسیاب شده' stays a bean."""
+        grinder = self._bean(
+            product_name="آسیاب دستی MHW-3BOMBER رنگ طوسی روشن",
+            roast_level="Light", url=".../gr",
+        )
+        mug = self._bean(
+            product_name="ماگ رجینال متوسط",
+            roast_level="Medium", url=".../mug",
+        )
+        ground = self._bean(product_name="قهوه آسیاب شده", url=".../gw")
+        call_command("import_catalog", file=self._write([grinder, mug, ground]),
+                     stdout=io.StringIO())
+        self.assertEqual(BeanListing.objects.count(), 1)
+        self.assertEqual(GearListing.objects.count(), 2)
+        self.assertEqual(BeanListing.objects.get().name, "قهوه آسیاب شده")
+
     def test_reimport_does_not_clobber_verified(self):
         bean = self._bean(in_stock=True)
         call_command("import_catalog", file=self._write([bean]), stdout=io.StringIO())

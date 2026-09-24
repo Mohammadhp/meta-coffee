@@ -14,6 +14,23 @@ CATEGORY_MAP = [
     ("brewer", ("دم", "brewer", "موکا", "چای")),
 ]
 
+# Product-name terms that can never be coffee beans. When one appears in
+# the name, the record is gear even if a bean signal (roast/process/format)
+# was falsely extracted from marketing copy — e.g. a grinder whose name
+# says "رنگ طوسی روشن" (light gray) or cleaning powder named "پودر ...".
+# "آسیاب" is exempted by the phrase "آسیاب شده" (ground coffee).
+GEAR_NAME_TERMS = (
+    "آسیاب", "شستشو", "تمیز", "ماگ", "پیچر", "موکاپات", "ترازو",
+    "سرور", "پرتافیلتر", "تمپر", "لولر", "کتل", "کتری", "دماسنج",
+)
+
+
+def _looks_like_gear(name):
+    n = (name or "").replace("‌", " ")  # ZWNJ -> space
+    if "آسیاب" in n and "آسیاب شده" in n:
+        return False  # ground coffee, not a grinder
+    return any(t in n for t in GEAR_NAME_TERMS)
+
 
 def _gear_category(categories):
     cats = categories or ""
@@ -71,7 +88,9 @@ class Command(BaseCommand):
                 # Classify as a bean when origin is known OR bean-specific fields
                 # are present (blends, decaf etc. may lack origin but still are
                 # coffee beans — they have roast_level / process / format).
-                is_bean = (
+                # A gear-sounding name vetoes: a "grinder" with a bogus roast
+                # extraction is still gear.
+                is_bean = not _looks_like_gear(r.get("product_name")) and (
                     r.get("origin")
                     or r.get("roast_level") in BeanListing.RoastLevel.values
                     or r.get("process") in BeanListing.Process.values
@@ -81,6 +100,9 @@ class Command(BaseCommand):
                     process = r["process"] if r.get("process") in BeanListing.Process.values else None
                     roast = r["roast_level"] if r.get("roast_level") in BeanListing.RoastLevel.values else None
                     fmt = r["format"] if r.get("format") in BeanListing.BeansFormat.values else None
+                    # Cross-table dedup: a product whose classification
+                    # flipped gear->bean leaves a stale gear row behind.
+                    GearListing.objects.filter(source_key=url).delete()
                     BeanListing.objects.update_or_create(
                         source_key=url,
                         defaults={
@@ -104,6 +126,8 @@ class Command(BaseCommand):
                     seen_keys.add(url)
                     n_beans += 1
                 else:
+                    # Cross-table dedup: flipped bean->gear.
+                    BeanListing.objects.filter(source_key=url).delete()
                     GearListing.objects.update_or_create(
                         source_key=url,
                         defaults={

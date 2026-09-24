@@ -124,8 +124,9 @@ def _word_match(keyword, text):
     ASCII letter + the Persian Unicode block (U+0600–U+06FF)."""
     kw = re.escape(keyword.lower())
     # letter chars on either side → substring, not a standalone word
-    boundary = r"(?<![a-z؀-ۿ])"
-    return bool(re.search(boundary + kw + boundary, text.lower()))
+    before = r"(?<![a-z؀-ۿ])"  # negative lookbehind
+    after = r"(?![a-z؀-ۿ])"    # negative lookahead
+    return bool(re.search(before + kw + after, text.lower()))
 
 
 def _extract_term(term_map, *texts):
@@ -566,7 +567,9 @@ def fetch_tds(client, site):
                 "origin": origin,
                 "process": process or extract_process(name, desc),
                 "roast_level": extract_roast(name, desc),
-                "format": extract_format(name, desc),
+                # A weighted coffee product with no explicit format term is
+                # sold whole-bean (TDS only sells whole beans by weight).
+                "format": extract_format(name, desc) or ("Whole bean" if weight else None),
                 "weight_g": weight,
                 "price_toman": price,
                 "price_per_100g": round(price / (weight / 100), 0) if price and weight else None,
