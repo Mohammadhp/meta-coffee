@@ -352,8 +352,10 @@ h1, h2, h3 { line-height: 1.4; font-weight: 700; color: var(--ink); }
 
 .card-img {
   width: 100%;
-  height: 180px;
-  object-fit: contain;
+  /* Square frame, filled edge-to-edge: most shop product shots are
+     already square, and cover keeps the rest uniform (no letterbox). */
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
   object-position: center;
   border-radius: 8px;
   background: var(--chip-bg);
